@@ -1,30 +1,60 @@
 # Invillia Reinvent - Sessao 7
 
-Este tutorial mostra como criar uma aplicação web 
+Este tutorial apresenta o passo-a-passo para criação uma aplicação web 
 usando Java e Spring Boot.
 
-O objetivo é implementar uma API Rest usando o máximo possível 
-de recursos e dependências do Spring, permitindo que o desenvolvedor(a)
-escreva menos código.
+O objetivo é implementar uma API Rest da forma mais simples possível, fazendo o uso 
+de uma dependência chamada `spring-boot-starter-web`. Esta dependência inclui o `spring-web`
+e `spring-webmvc`, além de um servidor Tomcat que permite que a aplicação seja executada 
+sem complicações.
 
+## API 
 
-## Instalação
+- GET /product - Retorna todos os produtos.
+- GET /product/{id} - Retorna um único produto.
+- POST /product - Cria ou atualiza um novo produto.
+- Payload de exemplo `
+{
+"id": "123",
+"description": "teste 1",
+"price": 99.80
+}`
+
+## Instalação do Ambiente de Desenvolvimento
+
+Para executar esse projeto você precisa ter os seguintes softwares instalados:
 
 - JDK 11+
 - Gradle 7+
-- jetbrains IntelliJ 
+- Jetbrains IntelliJ 
 - Docker 
 
+**Observação**: Este tutorial não cobre o procedimento de instalação dos softwares que é uma premissa
+para realização deste tutorial. Por ser softwares de uso comum dos desenvolvedores(as) Java, os procedimentos
+de instalação são comuns e muito bem documentados nos sites dos fornecedores e também em outros sites especializados 
+da internet.
+
+### Testando a Instalação
+
+Uma vez instalado os softwares podem ser testados executando os seguintes comandos no terminal:
+
+`java --version`
+
+`gradle -version`
+
+`docker --version`
+
+Todos ao serem executados deverão apresentar informações da versão instaladas no ambiente.
 
 
-## Iniciando o projeto 
+## Iniciando o Projeto 
 
 ### Gerando a estrutura inicial do projeto com o Spring Initializr 
 
-https://start.spring.io/
+O Spring Initializr é uma aplicação web que permite gerar a estrutura de um projeto base usando Spring Boot
+com Maven ou Gradle.
 
-Configuração da aplicação product-catalog
-
+Vamos utilizar o https://start.spring.io para gerar a estrutura inicial do projeto.
 
 - Project: Gradle Project
 - Language: Java
@@ -41,51 +71,70 @@ Configuração da aplicação product-catalog
   - Spring Web
   - Spring Data Elastic Search
 
-Clique em `Generate` faça o download do .zip.
-
-Descompacte o .zip. 
+Clique em `Generate` faça o download do arquivo .zip e descompacte o arquivo.
 
 ### Importanto o projeto no IntelliJ
 
 1. Inicie um novo projeto vazio "Empty Project". Neste momento você precisa definir um diretório para armazenar 
-todos os os arquivos do projeto. 
-2. Copie o diretório descompactado gerado pelo Spring Initializr no diretório do projeto. 
-3. Clique em File > Project Structure
+todos os os arquivos do projeto;
+2. Copie o diretório descompactado gerado pelo Spring Initializr no diretório do projeto; 
+3. Clique em File > Project Structure;
 4. No lista de ítem na parte esquerda da tela selecione `Modules`;
 5. Clique no ícone `+` e em seguida em `Import Module`;
-6. Selecione o diretório que fora descompactado e copiado para o diretório do projeto. 
+6. Selecione o diretório que fora descompactado e copiado para o diretório do projeto; e
 7. Será apresentado um popup com a opção `Gradle` selecionado, confirme a importação.
 
-O gradle levará alguns minutos para resolver as dependências do projeto e pronto o projeto esta importado.
+O gradle levará alguns minutos para resolver as dependências do projeto e pronto.
 
 ### Executando o projeto
 
-Procure na aplicação a classe com um método main e a anotação @SpringBootApplication. A classe
+Procure na aplicação a classe com um método main e a anotação `@SpringBootApplication`. A classe
 pode ser encontrada em `src\main\java\com\invillia\reinvent\productcatalog\ProductCatalogApplication`.
 
 Abra a classe clicando duas vezes sobre o arquivo e note que o IntelliJ já reconhece como 
-uma classe de execução (runtime). 
+uma classe executável. 
 
 Clique no ícone verde na linha de instrução do nome da classe e depois em `Run ProductCatalog...main()`
 
 Após executar o Spring deverá soltar algumas informações no console. Se tudo ocorreu bem até este ponto você 
 deverá ver as duas últimas linhas indicando que a aplicação esta ouvindo a porta 8080 e o tempo que levou para
-a aplicação subir:
+a aplicação inicializar:
 
 ```
+...
 Tomcat started on port(s): 8080 (http) with context path ''
 Started ProductCatalogApplication in 3.163 seconds (JVM running for 3.754)
 ```
 
 
-## Iniciando a implementação 
+## Iniciando a Implementação 
 
-### Criando a entidade
+### Criando a Entidade `Produto`
 
 Vamos começar criando a classe `Produto`. Essa classe representa um produto
 no catálogo de produtos.
 
-A classe deve ser criada em `src\main\java\com\invillia\reinvent\productcatalog\entity`:
+Vamos manter a simplicidade e criar uma classe com apenas três atributos: `id`, `description` e `price`. 
+Os dois primeiros atributos são alfanuméricos então usaremos o tipo String, o último é um decimal portanto 
+usaremos o tipo BigDecimal mais recomendado para valores monetários.
+
+Antes de criar a classe você precisa criar o pacote onde a classe irá ser criado a seguir. 
+
+Crie o pacote `entity` e o caminho completo do pacote ficará assim 
+`src\main\java\com\invillia\reinvent\productcatalog\entity`:
+
+A seguir crie a classe, inclua os atributos da classe com o modificador privado e gere os métodos 
+`get` e `set` para a classe. Lembre-se que o IntelliJ pode te ajudar com a construção de parte do código,
+mas se você é novo(a) em Java eu sugiro que você crie manualmente para ir se acostumando com a sintaxe 
+da linguagem.
+
+Para simplificar a construção de uma instância da classe Produto, vamos criar um método 
+contrutor padrão para a classe com todos os atributos da classe como parâmetro.
+
+Por fim, vamos também criar um método `toString()`. Este método será chamado toda vez 
+que precisarmos imprimir o estado do objeto no console por exemplo.
+
+Segue o código completo da classe produto:
 
 ```
 package com.invillia.reinvent.productcatalog.entity;
@@ -97,7 +146,13 @@ public class Product {
     private String id;
     private String description;
     private BigDecimal price;
-
+    
+    public Product(String id, String description, BigDecimal price) {
+        this.id = id;
+        this.description = description;
+        this.price = price;
+    }
+    
     public String getId() {
         return id;
     }
@@ -132,14 +187,26 @@ public class Product {
     }
 }
 ```
-A classe `Produto` deve ter os seguintes atributos:
-- id - Identificador único para o produto
-- description - Descrição do produto
-- price - Preço unitário do produto
 
-### Criando o controller
+### Criando o Controller
 
-Criando a classe de Controller
+O nome controller tem origem na arquitetura MVC (Model View Controller). Controller são 
+classes de objetos que possuem as seguintes responsabilidades:
+
+1. Interceptar HTTP Requests enviados para a aplicação;
+2. Converter o payload da requisição em uma estrutura interna de objetos;
+3. Chamar a camada Model;
+4. Receber o retorno do Model;
+5. Enviar o resultado para a aplicação que fez a chamada HTTP Response.
+
+Vamos iniciar com a implementação do método que deve retornar todos os produtos
+catálogo.
+
+Nesta fase do tutorial usaremos um `objeto mock` com o objetivo de simular um dado
+real sendo obtido da camada de persistência da aplicação. Mais a frente substituiremos
+esse código por uma integração com o repositório de dados.
+
+Inicialmente a classe `ProductCatalogController` ficará da seguinte forma:
 
 ```
 package com.invillia.reinvent.productcatalog.controller;
@@ -158,7 +225,7 @@ import java.util.List;
 public class ProductCatalogController {
 
     @GetMapping
-    public List<Product> list() {
+    public List<Product> listProducts() {
 
         List<Product> productList = new ArrayList<>() {{
            add(new Product("123", "Produto X", new BigDecimal(120.5)));
@@ -170,7 +237,9 @@ public class ProductCatalogController {
 }
 ```
 
-Implementar o resource
+Agora vamos implementar um segundo método na classe para tratar as requisições para 
+um único produto. Note que diferente do método que implementamos anteriormente, este novo
+método recebe como parâmetro identificador do produto.
 
 ```
     @GetMapping(value = "/{id}")
@@ -179,7 +248,8 @@ Implementar o resource
     }
 ```
 
-Teste
+O último método implementado tratará a criação de um novo produto. Os dados do produto
+serão fornecidos no corpo da requisição e obtidos através de um parâmetro do método.
 
 ```
     @PostMapping
@@ -188,7 +258,7 @@ Teste
     }
 ```
 
-## Persistência do dado
+## Persistência de Dados com Spring
 
 ### Elastic Search
 
@@ -213,7 +283,6 @@ Excute o seguinte comando no terminal do seu sistema operacional:
 ```
 docker run -d --name elasticsearch -p 9200:9200 -p 9300:9300 -e "discovery.type=single-node" elasticsearch:7.6.2
 ```
-
 
 ### Spring Data
 
