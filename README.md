@@ -298,12 +298,19 @@ interface que extende ElasticsearchRepository, esta interface irá prover as ope
 consultar documentos no Elastic Search com chamadas simples para os métodos da interface. 
 
 
-### Configurando o Elastic Search na aplicação Java com Spring
+### Configurando o Elastic Search no Java com Spring
 
-Para fazer a aplicação Java com Spring se conectar ao Elastic Search é necessário
-criar uma configuração (Configuration).
+Para configurar o Elastic Search na nossa aplicação Java, precisamos definir como a aplicacão
+vai se conectar com a instância do Elastic Search. 
 
-Crie um classe chamada `ElasticSearchConfig`:
+Neste tutorial usaremos o `RestHighLevelClient`
+que é uma das formas de conexão disponíveis quando adicionamos a dependência 
+`org.springframework.boot:spring-boot-starter-data-elasticsearch` no projeto.
+
+Crie o pacote `config` e o caminho completo do pacote ficará assim
+`src\main\java\com\invillia\reinvent\productcatalog\config`.
+
+No novo pacote cria uma classe chamada `ElasticSearchConfig` conforme exemplo abaixo:
 
 ```
 package com.invillia.reinvent.productcatalog.config;
@@ -337,7 +344,23 @@ public class ElasticSearchConfig {
 }
 ```
 
-Repository class:
+A anotação `@Configuration` informa ao Spring que a classe possui um ou mais métodos anotados
+com `@Bean`. Essa é uma instrução que permite ao Spring injetar a instância dos objetos 
+(retornados pelo método anotado) no contexto da aplicação. 
+
+A anotação `@EnableElasticsearchRepositories` permite que o Spring escaneie o pacote 
+fornecido e identifique as classes `Repositories`.
+
+Finalmente através da configuração injetamos as instâncias de `RestHighLevelClient` e 
+`ElasticsearchOperations`no contexto da aplicação. Isso é o suficiente para o Spring Data
+conectar e executar operações no Elastic Search.
+
+
+### Definindo Interfaces Repository
+
+Para definir um novo repositório de dados, podemos extender uma das interfaces fornecidas pelo 
+Spring Data Elastic Search. Neste tutorial vamos extender a interface `ElasticsearchRepository`
+que fornece operações basicas de indexação e consulta aos dodos do ElasticSearch.
 
 ```
 package com.invillia.reinvent.productcatalog.repository;
@@ -349,7 +372,16 @@ public interface ProductRepository extends ElasticsearchRepository<Product, Stri
 }
 ```
 
-Anote a classe `Produto`
+### Mapeando Entidade como Documento
+
+O mapeamento das entidade em documento permite definir a estrutura de dados que será persistida
+no ElasticSearch. Mapeando a estrutura evitamos comportamentos indesejados na nossa aplicação. 
+
+Abra a classe `Produto` e anote a classe com `@Document` fornecendo como parâmetro o nome do 
+índice que será criado no ElasticSearch.
+
+O atributo `id` deve ganhar a notação `@Id` assim o ElasticSearch saberá qual atributo deve
+ser usado como identificador único do documento.
 
 ```
 package com.invillia.reinvent.productcatalog.entity;
@@ -369,7 +401,13 @@ public class Product {
     ...
 ```
 
-Conectando com o repositório
+Agora precisamos mudar o código da nossa classe Controller, vamos substituir os `objetos mock`
+por chamadas para a camada de persistência de dados.
+
+Primeiramente é neessário injetar a instância do nosso repositório na classe. Para isso crie 
+um atributo privado e anote-o com `@Autowired`. 
+
+Por fim modifique o código dos três métodos conforme abaixo:
 
 ```
 @RestController
@@ -400,6 +438,22 @@ public class ProductCatalogController {
     }
 }
 ```
+
+## Conclusão
+
+Neste tutorial utilizamos o Spring Boot para gerar uma aplicação back-end que expoe uma
+API Rest para um catalogo de produtos. Exploramos ainda como conectar uma aplicação 
+a um repositório de dados usando o Spring Data e Elastic Search.
+
+O código utilizado neste tutorial esta disponível em https://github.com/oswaldoneto/invillia-reinvent-session-7
+
+
+
+
+
+
+
+
 
 
 
